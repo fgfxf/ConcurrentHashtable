@@ -161,7 +161,6 @@ int main()
     }
     printf("  写入 5 个 key, 当前大小: %zu\n", expiredTable.size());
     fflush(stdout);
-
     // 等待超过过期周期，观察过期回调是否触发
     // 注意：sleep 会被定时器信号中断，使用 nanosleep 循环累计等待时间
     printf("  等待 5 秒以触发过期清理...\n");
