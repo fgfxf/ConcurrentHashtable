@@ -202,7 +202,7 @@ namespace dt {
                 delete [] table;
                 delete mutex;
                 if (timerId != NULL) {
-                    printf ("timer = %p\n", timerId);
+                    // printf ("timer = %p\n", timerId);
                     Timer::getInstance().remove(timerId);
                 }
             }
@@ -401,13 +401,14 @@ namespace dt {
         Hashtable<K, V, F> * table = (Hashtable<K, V, F> * )para;
         ExpiredIterator<K, V, F> itr = table->expiredKeys();
         while (itr.hasNext()) {
-            if (table ->expiredFunc != NULL) {
-                K  key;
-                V  val;
-                itr.next(key, val);
+            K  key;
+            V  val;
+            itr.next(key, val);
+            if (table->expiredFunc != NULL) {
                 table->expiredFunc(key);
-                
             }
+            // 从哈希表中真正删除已过期的 key
+            table->remove(key);
         }
     }
 }

@@ -15,6 +15,6 @@ dt::timemilliseconds dt::getMilliseconds() {
             else {
                 timestamp_msec = -1;
             }
-            printf ("%lld milliseconds since epoch\n", timestamp_msec);
+            // printf ("%lld milliseconds since epoch\n", timestamp_msec);
             return  timestamp_msec;
 } 

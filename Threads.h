@@ -19,7 +19,7 @@ namespace dt {
         public :  
             Mutex() {
                 if (pthread_mutex_init(&lock, NULL) != 0) {
-                    printf("mutex init failed\n");
+                    // printf("mutex init failed\n");
                 }
             }
             
