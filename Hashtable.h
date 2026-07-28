@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <utility>
+#include <vector>
 #include <stdio.h>
 
 #include "Common.h"
@@ -294,19 +295,32 @@ namespace dt {
             
             void        clear()
             {
-                mutex = new ReadWriteMutex();
                 for (size_t j = 0; j<capacity; j++)
                 {
                     HashNode<K, V> * node = table[j];
-                    HashNode<K, V> * prev;
                     while (node != NULL) {
-                        prev = node;
+                        HashNode<K, V> * prev = node;
                         node = node->getNext();
                         delete prev;
                     }
+                    table[j] = NULL;
                 }
                 m_size = 0;
             }
+            void        shrink_to_fix()
+            {
+                WriteLock lock(mutex);
+                // 当元素数量远低于阈值时触发缩容，避免内存浪费
+                // 阈值 / 4 对应负载因子约 0.1875
+                if (m_size < threshold / 4 && capacity > defaultCapacity) {
+                    size_t newCapacity = capacity >> 2;
+                    if (newCapacity < defaultCapacity) {
+                        newCapacity = defaultCapacity;
+                    }
+                    rehash(newCapacity);
+                }
+            }
+            
             Iterator<K, V, F> keys()
             {
                 return Iterator<K,V, F>(*this);
@@ -343,12 +357,16 @@ namespace dt {
             {
                 
                 HashNode<K, V> ** newTable = new HashNode<K, V> * [newCapacity];
+                for (size_t i = 0; i < newCapacity; i++) {
+                    newTable[i] = NULL;
+                }
                 for (int j = 0; j< capacity; j++) {
                     HashNode<K, V> * entry = table[j];
                     while (entry != NULL) {
+                        HashNode<K, V> * next = entry->getNext();
                         putEntryInternal(newTable, newCapacity, entry->getKey(), entry->getValue(), entry->getTime());
                         delete entry;
-                        entry = entry->getNext();
+                        entry = next;
                     }
                 }
                 
@@ -399,15 +417,23 @@ namespace dt {
     template <typename K, typename V, typename F>
     void expire(void * para) {
         Hashtable<K, V, F> * table = (Hashtable<K, V, F> * )para;
-        ExpiredIterator<K, V, F> itr = table->expiredKeys();
-        while (itr.hasNext()) {
-            K  key;
-            V  val;
-            itr.next(key, val);
+        // 先在持读锁期间收集所有过期 key，避免在持读锁时调用 remove（请求写锁）导致死锁
+        std::vector<K> expiredKeys;
+        {
+            ExpiredIterator<K, V, F> itr = table->expiredKeys();
+            while (itr.hasNext()) {
+                K  key;
+                V  val;
+                itr.next(key, val);
+                expiredKeys.push_back(key);
+            }
+        }
+        // 释放读锁后，逐个删除已过期的 key（remove 内部自带写锁）
+        for (size_t i = 0; i < expiredKeys.size(); ++i) {
+            K & key = expiredKeys[i];
             if (table->expiredFunc != NULL) {
                 table->expiredFunc(key);
             }
-            // 从哈希表中真正删除已过期的 key
             table->remove(key);
         }
     }

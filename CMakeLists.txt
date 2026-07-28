@@ -6,3 +6,7 @@ SET( CMAKE_CXX_FLAGS  "-pthread" )
 SET(SRC_LIST Common.cpp Threads.cpp)
 add_executable(hashtable ${SRC_LIST} main.cpp)
 target_link_libraries(hashtable "-lrt")
+
+# 将测试纳入主项目构建
+enable_testing()
+add_subdirectory(test)
