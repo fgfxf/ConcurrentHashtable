@@ -6,5 +6,11 @@ add_executable(memory_leak_test ${SRC_LIST} memory_leak_test.cpp)
 target_include_directories(memory_leak_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
 target_link_libraries(memory_leak_test "-lrt")
 
+# RSS 内存占用诊断工具
+add_executable(memory_rss ${SRC_LIST} memory_rss.cpp)
+target_include_directories(memory_rss PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
+target_link_libraries(memory_rss "-lrt")
+
 # 注册为测试，便于通过 ctest 运行
 add_test(NAME memory_leak_test COMMAND memory_leak_test)
+add_test(NAME memory_rss COMMAND memory_rss)

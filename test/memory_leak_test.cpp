@@ -101,6 +101,9 @@ int main()
     }
 
     printf("  remove 完成后表大小: %zu (应为 0)\n", g_table.size());
+    // 缩容：remove 后 capacity 仍很大，调用 shrink_to_fit 释放多余 table 数组内存
+    g_table.shrink_to_fit();
+    printf("  shrink_to_fit() 后表大小: %zu (应为 0)\n", g_table.size());
     malloc_trim(0);
     // -------------------------------------------------------
     // 测试3：clear() 后重新使用
