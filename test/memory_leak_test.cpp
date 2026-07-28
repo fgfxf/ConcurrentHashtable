@@ -18,8 +18,8 @@
 // 使用 valgrind 运行可检测内存泄漏：
 //   valgrind --leak-check=full ./memory_leak_test
 
-static const int THREAD_COUNT = 16;
-static const int OPS_PER_THREAD = 50000;
+static const int THREAD_COUNT = 6;
+static const int OPS_PER_THREAD = 500000;
 
 // 全局哈希表
 static dt::Hashtable<unsigned long, unsigned long> g_table(1024, 0.75f);
@@ -123,6 +123,8 @@ int main()
         g_table.put(i, i * 20);
     }
     printf("  重新写入 500 项后大小: %zu\n", g_table.size());
+    g_table.clear();
+    g_table.shrink_to_fit();
 
     // -------------------------------------------------------
     // 测试3b：reverse() 缩容

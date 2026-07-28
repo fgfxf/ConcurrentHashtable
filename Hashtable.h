@@ -296,6 +296,7 @@ namespace dt {
             
             void        clear()
             {
+                WriteLock lock(mutex);
                 for (size_t j = 0; j<capacity; j++)
                 {
                     HashNode<K, V> * node = table[j];
