@@ -5,6 +5,7 @@
 #include <utility>
 #include <vector>
 #include <stdio.h>
+#include <malloc.h>
 
 #include "Common.h"
 #include "Threads.h"
@@ -307,7 +308,7 @@ namespace dt {
                 }
                 m_size = 0;
             }
-            void        shrink_to_fix()
+            void        shrink_to_fit()
             {
                 WriteLock lock(mutex);
                 // 当元素数量远低于阈值时触发缩容，避免内存浪费
@@ -318,6 +319,8 @@ namespace dt {
                         newCapacity = defaultCapacity;
                     }
                     rehash(newCapacity);
+                    // 缩容后强制 glibc 将空闲内存归还给操作系统，降低 RES 占用
+                    malloc_trim(0);
                 }
             }
             

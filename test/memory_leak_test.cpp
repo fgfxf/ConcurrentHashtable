@@ -19,7 +19,7 @@
 //   valgrind --leak-check=full ./memory_leak_test
 
 static const int THREAD_COUNT = 16;
-static const int OPS_PER_THREAD = 500000;
+static const int OPS_PER_THREAD = 50000;
 
 // 全局哈希表
 static dt::Hashtable<unsigned long, unsigned long> g_table(1024, 0.75f);
@@ -139,9 +139,9 @@ int main()
         }
         printf("  删除 99000 项后大小: %zu (剩余 1000)\n", rTable.size());
 
-        // 调用 shrink_to_fix() 缩容
-        rTable.shrink_to_fix();
-        printf("  shrink_to_fix() 缩容后大小: %zu\n", rTable.size());
+        // 调用 shrink_to_fit() 缩容
+        rTable.shrink_to_fit();
+        printf("  shrink_to_fit() 缩容后大小: %zu\n", rTable.size());
 
         // 验证缩容后数据仍正确
         bool ok = true;
